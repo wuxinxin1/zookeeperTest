@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * 基本api的测试
  * Created by Administrator on 2019/4/2/002.
  */
 public class ZkTest {
@@ -20,12 +21,41 @@ public class ZkTest {
     @Before
     public void createClient() throws IOException, InterruptedException {
         //创建zookeeper客户端
-         zooKeeper = new ZooKeeper("139.10.33.130:2181", 2000, new Watcher() {
+         zooKeeper = new ZooKeeper(ZKUtils.getIp()+":2181", 2000, new Watcher() {
             public void process(WatchedEvent watchedEvent) {
-                //System.out.println("hello");
+               // System.out.println("hello");
+                try {
+                    //ls_watch();
+                    get_watch();
+                } catch (KeeperException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
+
+    /**
+     * 测试节点的子节点监听(只会监听子节点的变化，数据变化不会监听到)
+     * ls  path watch
+     */
+    @Test
+    public void ls_watch() throws KeeperException, InterruptedException {
+        List<String> children = zooKeeper.getChildren("/wuxinxin", true);
+        System.out.println(children);
+    }
+
+    /**
+     * 测试节点的数据监听(只会监听节点数据的变化，节点变化不会监听到)
+     * get  path watch
+     */
+    @Test
+    public void get_watch() throws KeeperException, InterruptedException {
+        byte[] data = zooKeeper.getData("/wuxinxin", true, null);
+        System.out.println(new String (data));
+    }
+
 
     /**
      * 获取节点的子节点,相当于ls 命令
@@ -94,6 +124,7 @@ public class ZkTest {
         zooKeeper.delete(path,1);
     }
 
+
     @Test public void getAcl() throws KeeperException, InterruptedException {
         String path="/";
 
@@ -105,7 +136,7 @@ public class ZkTest {
 
     @After
     public void closeClient() throws InterruptedException {
-        Thread.sleep(30000);
+        Thread.sleep(Long.MAX_VALUE);
         zooKeeper.close();
     }
 
